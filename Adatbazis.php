@@ -4,7 +4,7 @@ class Adatbazis {
     private $host = "localhost";
     private $felhasznaloNev = "root";
     private $jelszo = "";
-    private $adatbazis = "magyarkartya";
+    private $adatbazis = "kartya";
     private $kapcsolat;
     //konstruktor
     public function __construct()
@@ -29,6 +29,7 @@ class Adatbazis {
         $sql = "SELECT $oszlop FROM $tabla";
         return $this->kapcsolat->query($sql);
     }
+
     public function megjelenit($matrix){
         while ($sor = $matrix->fetch_row()){
             echo "<img src=\"forras/$sor[0]\" alt=\"forras/$sor[0]\">";
@@ -39,6 +40,7 @@ class Adatbazis {
         $sql = "SELECT $oszlop1, $oszlop2 FROM $tabla";
         return $this->kapcsolat->query($sql);
     }
+
     public function megjelenit2($matrix){
         echo "<table>";
         echo "<tr><th>Név</th><th>Kép</th></tr>";
@@ -62,16 +64,34 @@ class Adatbazis {
         $sql = "SELECT * FROM $tabla";
         return $this->kapcsolat->query($sql)->num_rows;
     }
+
     public function kartyaFeltolt(){
         $szinOsszeg = $this->rekordokSzama("szin")+1;
         $formaOsszeg = $this->rekordokSzama("forma")+1;
         for ($szinIndex = 1; $szinIndex < $szinOsszeg; $szinIndex++) { 
             for ($formaIndex = 1; $formaIndex < $formaOsszeg; $formaIndex++) { 
-                $sql = "INSERT INTO kartya(szinAzon, formaAzon) VALUES ('$szinIndex','$formaIndex')";
+                $sql = "INSERT INTO kartyak(szinAzon, formaAzon) VALUES ('$szinIndex','$formaIndex')";
                 $this->kapcsolat->query($sql);
             }
         }
     }
+
+    public function torlesForma($forma){
+        $sql = "DELETE FROM kartyak 
+        WHERE formaAzon IN
+        (SELECT formaAzon FROM forma
+        WHERE szoveg = '$forma')";
+        return $this->kapcsolat->query($sql);
+    }
+
+    public function beszurForma($forma){
+        $szam = $this->rekordokSzama("szin");
+        for ($i=1; $i < $szam; $i++) { 
+            $sql = "INSERT INTO kartyak(szinAzon, formaAzon) VALUES ('$i','$forma')";
+            return $this->kapcsolat->query($sql);
+        }
+    }
+
     public function kapcsolatBezar(){
         $this->kapcsolat->close();
     }
